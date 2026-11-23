@@ -24,7 +24,7 @@ All verksamhetskonfiguration finns i [src/schedule.config.ts](src/schedule.confi
 
 Den aktuella veckan beräknas i tidszonen `Europe/Stockholm`. En vecka löper från måndag till söndag. Årsvyerna visar alla tilldelade veckor som överlappar det valda kalenderåret. En vecka över nyår visas och räknas därför i båda årsvyerna och behåller sitt ISO-veckoår och sitt veckonummer.
 
-Mina veckor sparar senaste valet i webbläsaren och skriver det i adressen när ett namn väljs. Bokmärk eller dela hela adressen. Direktlänkar som `?person=Oscar` öppnar också personvyn. Hela schemat visar vid personfilter både personens tilldelningar och gemensamma veckor. Markera **Visa tidigare veckor** för att se hela det innevarande året. Avslutade veckor visas i grått och tidigare kalenderår visas direkt.
+Mina veckor sparar senaste valet i webbläsaren och skriver det i adressen när ett namn väljs. Bokmärk eller dela hela adressen. Direktlänkar som `?person=Oscar` öppnar också personvyn. Hela schemat visar vid personfilter både personens tilldelningar och gemensamma veckor. Markera **Visa tidigare veckor** i Mina veckor eller Hela schemat för att se alla tilldelningar under det innevarande året. Avslutade veckor visas i grått och tidigare kalenderår visas direkt.
 
 ## Lägg till premiärveckor och uppehåll
 

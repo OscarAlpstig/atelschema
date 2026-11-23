@@ -152,6 +152,13 @@ function PersonSelect({ label, value, empty, onChange }: {
   </label>
 }
 
+function HistoryFilter({ checked, onChange }: { checked: boolean; onChange: (checked: boolean) => void }) {
+  return <label className="history-filter">
+    <input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} />
+    Visa tidigare veckor
+  </label>
+}
+
 function WeekList({ weeks, current, empty }: {
   weeks: readonly ScheduleWeek[]; current: Day; empty: ReactNode
 }) {
@@ -190,7 +197,10 @@ function PersonalView({ person, onPerson, today, current, calendarYear, minYear 
   calendarYear: number; minYear: number
 }) {
   const [year, setYear] = useState(calendarYear)
+  const [showPast, setShowPast] = useState(false)
   const weeks = personalWeeks(schedule.weeksForYear(year), person, today)
+  const canToggleHistory = year === calendarYear && weeks.regular.length > weeks.upcoming.length
+  const showFullYear = year < calendarYear || (canToggleHistory && showPast)
   const next = person ? schedule.nextForPerson(person, today) : undefined
 
   return <>
@@ -201,6 +211,7 @@ function PersonalView({ person, onPerson, today, current, calendarYear, minYear 
     <div className="filters surface">
       <PersonSelect label="Ditt namn" empty="Välj ditt namn" value={person} onChange={onPerson} />
       <YearControl year={year} onChange={setYear} min={minYear} />
+      {canToggleHistory && <HistoryFilter checked={showPast} onChange={setShowPast} />}
     </div>
     {person ? <>
       <div className="personal-grid">
@@ -220,9 +231,10 @@ function PersonalView({ person, onPerson, today, current, calendarYear, minYear 
           </div>
         </article>
       </div>
-      <section className="list-section" aria-labelledby="personal-upcoming">
-        <h2 id="personal-upcoming">Kommande ordinarie veckor</h2>
-        <WeekList weeks={weeks.upcoming} current={current} empty={`Du har inga kommande ordinarie veckor under ${year}.`} />
+      <section className="list-section" aria-labelledby="personal-weeks">
+        <h2 id="personal-weeks">{showFullYear ? 'Alla dina ordinarie veckor' : 'Kommande ordinarie veckor'}</h2>
+        <WeekList weeks={showFullYear ? weeks.regular : weeks.upcoming} current={current}
+          empty={`Du har inga ${showFullYear ? '' : 'kommande '}ordinarie veckor under ${year}.`} />
       </section>
       <section className="list-section" aria-labelledby="personal-everyone">
         <h2 id="personal-everyone">Specialveckor då alla åtlar</h2>
@@ -250,10 +262,7 @@ function ScheduleView({ current, calendarYear, minYear }: { current: Day; calend
     <div className="filters surface">
       <YearControl year={year} onChange={setYear} min={minYear} />
       <PersonSelect label="Filtrera på person" empty="Alla deltagare" value={filter} onChange={setFilter} />
-      {canToggleHistory && <label className="history-filter">
-        <input type="checkbox" checked={showPast} onChange={(event) => setShowPast(event.target.checked)} />
-        Visa tidigare veckor
-      </label>}
+      {canToggleHistory && <HistoryFilter checked={showPast} onChange={setShowPast} />}
     </div>
     <section className="list-section" aria-labelledby="year-heading">
       <h2 id="year-heading">Veckor under {year}</h2>

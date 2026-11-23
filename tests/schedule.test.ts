@@ -88,6 +88,7 @@ test('personvyn följer huvudschemat och visar alla-veckor separat', () => {
   const own = personalWeeks(weeks, 'Benke', from)
   const assigned = weeks.filter((week) => week.person === 'Benke')
   assert.equal(own.count, assigned.length)
+  assert.deepEqual(own.regular, assigned)
   assert.deepEqual(own.upcoming, assigned.filter((week) => week.end >= from))
   assert.deepEqual(own.everyone.map((week) => week.week), [39])
   assert.equal(schedule.nextForPerson('Benke', from)?.start, own.upcoming[0]?.start)

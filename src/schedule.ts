@@ -126,6 +126,7 @@ export function personalWeeks(weeks: readonly ScheduleWeek[], person: string, fr
   const regular = weeks.filter((week) => week.type === 'regular' && week.person === person)
   return {
     count: regular.length,
+    regular,
     upcoming: regular.filter((week) => week.end >= from),
     everyone: weeks.filter((week) => week.type === 'everyone'),
   }
