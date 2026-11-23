@@ -159,7 +159,16 @@ test('regression över flera år med fast ankare och bevarade historiska special
   }
 })
 
-test('aktuella konfigurationen följer Word-schemat från vecka 48 till årsskiftet', () => {
+test('aktuella konfigurationen matchar Word-schemat för hela 2026', () => {
+  const schedule = createSchedule(scheduleConfig)
+  assert.equal(schedule.start, isoMonday(2026, 1))
+  for (let week = 1; week <= 52; week++) {
+    const expected = participants[(week - 1) % participants.length]
+    assert.equal(schedule.weekAt(isoMonday(2026, week))?.person, expected, `2026-W${week}`)
+  }
+})
+
+test('den fastställda ordningen inför årsskiftet och tilldelningen för vecka 53 bevaras', () => {
   const schedule = createSchedule(scheduleConfig)
   const checkpoints = [
     [48, 'Göran'],

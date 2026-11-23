@@ -2,7 +2,7 @@
 
 Jaktlagets rullande åtelschema. Webbappen har tre vyer för aktuell vecka, personliga veckor och hela schemat. Den byggs med React, TypeScript och Vite och körs som en statisk webbplats.
 
-Schemat börjar måndag 23 november 2026 med Göran, som ansvarar för vecka 48 i jaktlagets Word-schema. Word-schemat anger tilldelningar till och med vecka 52. Vecka 53 går till Matte enligt den ordinarie rotationen.
+Schemat börjar måndag 29 december 2025 med Svenne, som ansvarar för ISO-vecka 1 år 2026 i jaktlagets Word-schema. Word-schemat anger tilldelningar till och med vecka 52. Vecka 53 går till Matte enligt den ordinarie rotationen.
 
 ## Kör lokalt
 
@@ -24,7 +24,7 @@ All verksamhetskonfiguration finns i [src/schedule.config.ts](src/schedule.confi
 
 Den aktuella veckan beräknas i tidszonen `Europe/Stockholm`. En vecka löper från måndag till söndag. Årsvyerna visar alla tilldelade veckor som överlappar det valda kalenderåret. En vecka över nyår visas och räknas därför i båda årsvyerna och behåller sitt ISO-veckoår och sitt veckonummer.
 
-Mina veckor sparar senaste valet i webbläsaren och skriver det i adressen när ett namn väljs. Bokmärk eller dela hela adressen. Direktlänkar som `?person=Oscar` öppnar också personvyn. Hela schemat visar vid personfilter både personens tilldelningar och gemensamma veckor.
+Mina veckor sparar senaste valet i webbläsaren och skriver det i adressen när ett namn väljs. Bokmärk eller dela hela adressen. Direktlänkar som `?person=Oscar` öppnar också personvyn. Hela schemat visar vid personfilter både personens tilldelningar och gemensamma veckor. Markera **Visa tidigare veckor** för att se hela det innevarande året. Avslutade veckor visas i grått och tidigare kalenderår visas direkt.
 
 ## Lägg till premiärveckor och uppehåll
 

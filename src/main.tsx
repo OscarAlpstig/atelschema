@@ -158,7 +158,9 @@ function WeekList({ weeks, current, empty }: {
   if (weeks.length === 0) return <p className="empty surface">{empty}</p>
 
   return <ul className="week-list surface">
-    {weeks.map((week) => <li key={week.start} className={week.start === current ? 'is-current' : undefined}>
+    {weeks.map((week) => <li key={week.start} className={
+      week.start === current ? 'is-current' : week.start < current ? 'is-past' : undefined
+    }>
       <details>
         <summary aria-current={week.start === current ? 'date' : undefined}>
           <span className="week-number"><span>VECKA</span><strong>{String(week.week).padStart(2, '0')}</strong></span>
@@ -233,8 +235,12 @@ function PersonalView({ person, onPerson, today, current, calendarYear, minYear 
 function ScheduleView({ current, calendarYear, minYear }: { current: Day; calendarYear: number; minYear: number }) {
   const [year, setYear] = useState(calendarYear)
   const [filter, setFilter] = useState('')
-  const weeks = schedule.weeksForYear(year).filter((week) =>
-    !filter || week.person === filter || week.type === 'everyone',
+  const [showPast, setShowPast] = useState(false)
+  const yearWeeks = schedule.weeksForYear(year)
+  const canToggleHistory = year === calendarYear && yearWeeks.some((week) => week.start < current)
+  const weeks = yearWeeks.filter((week) =>
+    (!canToggleHistory || showPast || week.start >= current) &&
+    (!filter || week.person === filter || week.type === 'everyone'),
   )
   return <>
     <header className="page-heading">
@@ -244,6 +250,10 @@ function ScheduleView({ current, calendarYear, minYear }: { current: Day; calend
     <div className="filters surface">
       <YearControl year={year} onChange={setYear} min={minYear} />
       <PersonSelect label="Filtrera på person" empty="Alla deltagare" value={filter} onChange={setFilter} />
+      {canToggleHistory && <label className="history-filter">
+        <input type="checkbox" checked={showPast} onChange={(event) => setShowPast(event.target.checked)} />
+        Visa tidigare veckor
+      </label>}
     </div>
     <section className="list-section" aria-labelledby="year-heading">
       <h2 id="year-heading">Veckor under {year}</h2>
