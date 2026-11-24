@@ -18,6 +18,12 @@ npm run preview
 
 `npm run dev` startar utvecklingsservern. Kör `npm run preview` efter bygget för att testa produktionsfilerna i `dist/`.
 
+## Installera på mobilen
+
+Öppna **Installera appen** på webbplatsen för anvisningar för iPhone (Safari) och Android (Chrome). Efter första laddningen med internet kan den installerade webbappen visa senast nedladdade schemat offline. När en ny version finns kan du välja **Uppdatera**.
+
+Installationen och offline-stödet fungerar på GitHub Pages och i den lokala förhandsvisningen av produktionsbygget. Service workern är avstängd i utvecklingsservern så att lokala ändringar syns direkt.
+
 ## Så räknas schemat
 
 All verksamhetskonfiguration finns i [src/schedule.config.ts](src/schedule.config.ts). `scheduleStart` är den första måndagen i schemat och `startPerson` är den första ordinarie ansvariga. Den personen måste finnas i `participants`. Varje ordinarie vecka går turen vidare i listan. Rotationen fortsätter genom årsskiftet, även efter en ISO-vecka 53. Före startdatumet visas inga tilldelningar.

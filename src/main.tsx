@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { DAYS_PER_WEEK, dateKey, formatDate, formatRange, isoWeek, monday, stockholmDay, type Day } from './dates.ts'
 import { createSchedule, personalWeeks, type ScheduleWeek } from './schedule.ts'
 import { scheduleConfig } from './schedule.config.ts'
+import { InstallMenu, PwaUpdateNotice } from './pwa.tsx'
 import './styles.css'
 
 const views = [
@@ -327,9 +328,11 @@ function App() {
             <a key={id} href={'#' + id} aria-current={view.id === id ? 'page' : undefined}><Icon name={icon} />{label}</a>,
           )}
         </nav>
+        <InstallMenu />
       </div>
     </header>
     <main className="shell main">
+      <PwaUpdateNotice />
       {scheduleConfig.provisional && <p className="notice"><Icon name="info" /><span><strong>Provrotation.</strong> Startveckan ska bekräftas av jaktlaget.</span></p>}
       {view.id === 'den-har-veckan' && <WeekView current={current} />}
       {view.id === 'mina-veckor' && <PersonalView person={person} onPerson={selectPerson}
