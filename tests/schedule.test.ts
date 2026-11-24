@@ -185,6 +185,43 @@ test('den fastställda ordningen inför årsskiftet och tilldelningen för vecka
   }
 })
 
+test('premiärveckorna återkommer från 2027 och pausar rotationen utan att ändra 2026', () => {
+  const schedule = createSchedule(scheduleConfig)
+  const withoutPremieres = createSchedule({ ...scheduleConfig, yearlySpecialWeeks: [] })
+  assert.deepEqual(schedule.weeksForYear(2026), withoutPremieres.weeksForYear(2026))
+
+  for (const [date, week] of [
+    ['2027-08-16', 33], ['2027-10-08', 40],
+    ['2028-08-16', 33], ['2028-10-08', 40],
+  ] as const) {
+    const day = parseDay(date)
+    const special = schedule.weekAt(day)!
+    assert.equal(special.week, week, date)
+    assert.equal(special.type, 'everyone', date)
+    assert.match(special.description ?? '', /premiär/)
+  }
+
+  const afterAugust = isoMonday(2027, 34)
+  const afterOctober = isoMonday(2027, 41)
+  assert.equal(schedule.weekAt(afterAugust)?.person, withoutPremieres.weekAt(afterAugust - 7)?.person)
+  assert.equal(schedule.weekAt(afterOctober)?.person, withoutPremieres.weekAt(afterOctober - 14)?.person)
+  const person = schedule.weekAt(afterAugust)?.person!
+  assert.equal(schedule.nextForPerson(person, afterAugust - 7)?.start, afterAugust)
+})
+
+test('en återkommande regel kan avslutas inför ett nytt år och krockar upptäcks', () => {
+  const rule = { monthDay: '10-08', fromYear: 2027, throughYear: 2027, type: 'everyone' } as const
+  const schedule = create({ yearlySpecialWeeks: [rule] })
+  assert.equal(schedule.weekAt(parseDay('2027-10-08'))?.type, 'everyone')
+  assert.equal(schedule.weekAt(parseDay('2028-10-08'))?.type, 'regular')
+  assert.throws(() => create({ yearlySpecialWeeks: [{ ...rule, monthDay: '02-29' }] }), /Ogiltigt datum/)
+  assert.throws(() => create({ yearlySpecialWeeks: [{ ...rule, throughYear: 2026 }] }), /Ogiltigt årsspann/)
+  assert.throws(() => create({
+    yearlySpecialWeeks: [rule],
+    specialWeeks: [{ year: 2027, week: 40, type: 'none' }],
+  }), /flera gånger/)
+})
+
 test('en daterad turordningsändring bevarar historiken, även med specialvecka vid bytet', () => {
   const change = {
     effectiveFrom: '2026-10-05',

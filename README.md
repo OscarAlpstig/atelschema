@@ -37,6 +37,8 @@ Lägg till poster i `specialWeeks`. Exemplen visar de två datumformaten.
 
 `year` betyder ISO-veckoår och `date` måste vara veckans måndag. Med `everyone` ansvarar alla och med `none` ansvarar ingen. Båda pausar rotationen under veckan. Med `regular` kan en ordinarie vecka få en beskrivning medan turen går vidare som vanligt.
 
+Sedan 2027 är veckorna som innehåller 16 augusti och 8 oktober gemensamma åtelveckor. De ligger i `yearlySpecialWeeks`, där `monthDay` är premiärdatumet i formatet `MM-DD` och `fromYear` är första kalenderåret. Hela veckan från måndag till söndag blir gemensam. Om ett datum ändras, lägg till `throughYear` på den befintliga regeln och skapa en ny regel från året då ändringen ska börja gälla.
+
 **Behåll alla tidigare specialveckor från rotationsankaret.** Om en historisk paus tas bort eller byter typ kan tilldelningarna efter den veckan ändras. När nästa års schema ska uppdateras, lägg till årets nya specialveckor i befintlig lista och behåll ankaret och tidigare års poster. Kör `npm test` och `npm run build` före push.
 
 ## Ändra deltagare eller turordning

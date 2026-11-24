@@ -1,9 +1,15 @@
 import { calendarYearBounds, DAYS_PER_WEEK, isoMonday, isoWeek, monday, parseDay, type Day } from './dates.ts'
 
 export type WeekType = 'regular' | 'everyone' | 'none'
-type SpecialWeek = ({ date: string } | { year: number; week: number }) & {
+type SpecialWeekDetails = {
   type: WeekType
   description?: string
+}
+type SpecialWeek = ({ date: string } | { year: number; week: number }) & SpecialWeekDetails
+type YearlySpecialWeek = SpecialWeekDetails & {
+  monthDay: string
+  fromYear: number
+  throughYear?: number
 }
 type Rotation = {
   startPerson: string
@@ -13,6 +19,7 @@ type Rotation = {
 export type ScheduleConfig = Rotation & {
   scheduleStart: string
   specialWeeks: readonly SpecialWeek[]
+  yearlySpecialWeeks?: readonly YearlySpecialWeek[]
   rotationChanges?: readonly (Rotation & { effectiveFrom: string })[]
   provisional?: boolean
 }
@@ -51,18 +58,46 @@ export function createSchedule(config: ScheduleConfig) {
     throw new Error('Nya turordningar måste börja efter ankaret och anges i stigande datumordning.')
   }
 
-  const specials = new Map<Day, SpecialWeek>()
-  for (const entry of config.specialWeeks) {
-    const day = 'date' in entry ? mondayFrom(entry.date) : isoMonday(entry.year, entry.week)
+  const specials = new Map<Day, SpecialWeekDetails>()
+  function addSpecial(day: Day, { type, description }: SpecialWeekDetails) {
     if (day < start) throw new Error('En specialvecka börjar före rotationsankaret.')
     if (specials.has(day)) throw new Error('Samma specialvecka har angetts flera gånger.')
-    if (!['regular', 'everyone', 'none'].includes(entry.type)) {
-      throw new Error(`Okänd veckotyp: ${entry.type}.`)
-    }
-    specials.set(day, { ...entry })
+    if (!['regular', 'everyone', 'none'].includes(type)) throw new Error(`Okänd veckotyp: ${type}.`)
+    specials.set(day, { type, description })
   }
-  const pauses = [...specials].filter(([, week]) => week.type !== 'regular').map(([day]) => day)
+
+  for (const entry of config.specialWeeks) {
+    const day = 'date' in entry ? mondayFrom(entry.date) : isoMonday(entry.year, entry.week)
+    addSpecial(day, entry)
+  }
+  for (const rule of config.yearlySpecialWeeks ?? []) {
+    const { monthDay, fromYear, throughYear = 9999 } = rule
+    if (!Number.isInteger(fromYear) || !Number.isInteger(throughYear) ||
+        fromYear < 1 || throughYear > 9999 || throughYear < fromYear) {
+      throw new Error('Ogiltigt årsspann för en återkommande specialvecka.')
+    }
+    // Validate against a non-leap year so the date exists every year.
+    parseDay(`2001-${monthDay}`)
+    for (let year = fromYear; year <= throughYear; year++) {
+      const day = parseDay(`${String(year).padStart(4, '0')}-${monthDay}`)
+      addSpecial(monday(day), rule)
+    }
+  }
+  const pauses = [...specials].filter(([, week]) => week.type !== 'regular')
+    .map(([day]) => day).sort((a, b) => a - b)
   const participants = [...new Set(rotations.flatMap((rotation) => rotation.participants))]
+
+  // Find the number of pauses strictly before the given boundary.
+  function pausesBefore(day: Day) {
+    let low = 0
+    let high = pauses.length
+    while (low < high) {
+      const middle = Math.floor((low + high) / 2)
+      if (pauses[middle] < day) low = middle + 1
+      else high = middle
+    }
+    return low
+  }
 
   function weekAt(day: Day): ScheduleWeek | undefined {
     const weekStart = monday(day)
@@ -77,7 +112,7 @@ export function createSchedule(config: ScheduleConfig) {
     if (special && special.type !== 'regular') return { ...details, type: special.type }
 
     const rotation = rotations.findLast((period) => period.start <= weekStart)!
-    const skipped = pauses.filter((pause) => pause >= rotation.start && pause < weekStart).length
+    const skipped = pausesBefore(weekStart) - pausesBefore(rotation.start)
     const turns = (weekStart - rotation.start) / DAYS_PER_WEEK - skipped
     const index = (rotation.startIndex + turns) % rotation.participants.length
     return { ...details, type: 'regular', person: rotation.participants[index] }
@@ -108,7 +143,8 @@ export function createSchedule(config: ScheduleConfig) {
       if (!rotation.participants.includes(person)) continue
       const next = rotations[index + 1]?.start ?? Infinity
       let candidate = Math.max(first, rotation.start)
-      const pausesInPeriod = pauses.filter((pause) => pause >= candidate && pause < next).length
+      if (candidate >= next) continue
+      const pausesInPeriod = pausesBefore(next) - pausesBefore(candidate)
       // Within one full rotation plus the pauses, every member gets a turn.
       const limit = Math.min(next, candidate + (rotation.participants.length + pausesInPeriod) * DAYS_PER_WEEK)
       for (; candidate < limit; candidate += DAYS_PER_WEEK) {
