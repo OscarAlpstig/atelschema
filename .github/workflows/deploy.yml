@@ -50,6 +50,9 @@ jobs:
           PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
       - uses: actions/upload-pages-artifact@v5
         with:
+          name: github-pages-${{ github.run_attempt }}
           path: dist
       - uses: actions/deploy-pages@v5
         id: deployment
+        with:
+          artifact_name: github-pages-${{ github.run_attempt }}
