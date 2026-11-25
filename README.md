@@ -87,6 +87,8 @@ PAGES_BASE_PATH=/atelschema npm run preview
 
 Öppna `http://localhost:4173/atelschema/?person=Oscar`.
 
-## Framtida kalenderexport
+## Lägg till åtelveckor i kalendern
 
-Motorn i [src/schedule.ts](src/schedule.ts) kan användas direkt från ett framtida exportskript. Den returnerar veckans måndag, söndag, typ och ansvarig utan att bero på React eller webbläsaren. En export kan använda de ordinarie tilldelningarna för vald person och gemensamma veckor. En stabil UID kan byggas av ett fast kalender-ID, ett beständigt person-ID och veckans måndagsdatum. Kalenderexport ingår inte i den här versionen.
+Välj namn under **Mina veckor** och öppna **Lägg till i kalendern**. På iPhone kan du prenumerera direkt i Apple Kalender. För Google Kalender kan du öppna en vecka och lägga till den från telefonen, eller prenumerera på alla veckor via **Andra kalendrar → Från webbadress** på datorn och använda samma Google-konto på telefonen.
+
+**Ladda ner (.ics)** exporterar en ögonblicksbild för valt kalenderår, inklusive tidigare och gemensamma veckor. Det går även offline. Prenumerationslänken innehåller tilldelningar från schemats start till och med fem år efter byggårets slut. Filerna skapas från schemat vid varje publicering och kalenderappen bestämmer när den hämtar ändringar. Händelserna visas som heldagshändelser från måndag till söndag utan att blockera tid.

@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client'
 import { DAYS_PER_WEEK, dateKey, formatDate, formatRange, isoWeek, monday, stockholmDay, type Day } from './dates.ts'
 import { createSchedule, personalWeeks, type ScheduleWeek } from './schedule.ts'
 import { scheduleConfig } from './schedule.config.ts'
+import { CalendarMenu } from './calendar-menu.tsx'
+import { googleCalendarUrl } from './calendar.ts'
 import { InstallMenu, PwaUpdateNotice } from './pwa.tsx'
 import './styles.css'
 
@@ -160,8 +162,8 @@ function HistoryFilter({ checked, onChange }: { checked: boolean; onChange: (che
   </label>
 }
 
-function WeekList({ weeks, current, empty }: {
-  weeks: readonly ScheduleWeek[]; current: Day; empty: ReactNode
+function WeekList({ weeks, current, empty, showCalendarLinks = false }: {
+  weeks: readonly ScheduleWeek[]; current: Day; empty: ReactNode; showCalendarLinks?: boolean
 }) {
   if (weeks.length === 0) return <p className="empty surface">{empty}</p>
 
@@ -187,6 +189,8 @@ function WeekList({ weeks, current, empty }: {
           <p>Måndag {formatDate(week.start)} – söndag {formatDate(week.end)}</p>
           {week.description && <p>{week.description}</p>}
           {week.type !== 'regular' && <p>Veckan pausar turordningen.</p>}
+          {showCalendarLinks && <a className="button calendar-week-link" href={googleCalendarUrl(week)}
+            target="_blank" rel="noreferrer">Lägg till i Google Kalender</a>}
         </div>
       </details>
     </li>)}
@@ -199,7 +203,8 @@ function PersonalView({ person, onPerson, today, current, calendarYear, minYear 
 }) {
   const [year, setYear] = useState(calendarYear)
   const [showPast, setShowPast] = useState(false)
-  const weeks = personalWeeks(schedule.weeksForYear(year), person, today)
+  const yearWeeks = schedule.weeksForYear(year)
+  const weeks = personalWeeks(yearWeeks, person, today)
   const canToggleHistory = year === calendarYear && weeks.regular.length > weeks.upcoming.length
   const showFullYear = year < calendarYear || (canToggleHistory && showPast)
   const next = person ? schedule.nextForPerson(person, today) : undefined
@@ -232,14 +237,16 @@ function PersonalView({ person, onPerson, today, current, calendarYear, minYear 
           </div>
         </article>
       </div>
+      <CalendarMenu key={person} person={person} year={year} weeks={yearWeeks} />
       <section className="list-section" aria-labelledby="personal-weeks">
         <h2 id="personal-weeks">{showFullYear ? 'Alla dina ordinarie veckor' : 'Kommande ordinarie veckor'}</h2>
-        <WeekList weeks={showFullYear ? weeks.regular : weeks.upcoming} current={current}
+        <WeekList weeks={showFullYear ? weeks.regular : weeks.upcoming} current={current} showCalendarLinks
           empty={`Du har inga ${showFullYear ? '' : 'kommande '}ordinarie veckor under ${year}.`} />
       </section>
       <section className="list-section" aria-labelledby="personal-everyone">
         <h2 id="personal-everyone">Specialveckor då alla åtlar</h2>
-        <WeekList weeks={weeks.everyone} current={current} empty={`Inga gemensamma specialveckor under ${year}.`} />
+        <WeekList weeks={weeks.everyone} current={current} showCalendarLinks
+          empty={`Inga gemensamma specialveckor under ${year}.`} />
       </section>
     </> : <p className="empty surface">Välj ditt namn för att visa dina åtelveckor.</p>}
   </>
